@@ -119,3 +119,7 @@ __pycache__/
 .venv/
 # Claude Code のローカル設定
 .claude/settings.local.json
+
+# Unity が異常終了時に作る復旧シーン
+/Assets/_Recovery/
+/Assets/_Recovery.meta
