@@ -123,3 +123,6 @@ __pycache__/
 # Unity が異常終了時に作る復旧シーン
 /Assets/_Recovery/
 /Assets/_Recovery.meta
+
+# バッチ実験用プレイヤー（AirportSim > Build Batch Player の出力）
+/[Bb]uilds/

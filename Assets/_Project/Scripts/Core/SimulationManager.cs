@@ -223,7 +223,14 @@ namespace AirportSim
         void Finish()
         {
             finished = true;
-            Kpi.WriteResults();
+            try
+            {
+                Kpi.WriteResults();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e); // 書き出しに失敗しても終了はする（バッチ実行が止まらないように）
+            }
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else
@@ -257,6 +264,20 @@ namespace AirportSim
                 {
                     float d;
                     if (float.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out d)) c.durationSeconds = d;
+                }
+                else if (key == "-spawnrate")
+                {
+                    float r;
+                    if (float.TryParse(val, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out r)) c.spawnRatePerMinute = r;
+                }
+                else if (key == "-robots")
+                {
+                    int n;
+                    if (int.TryParse(val, out n)) c.robotCount = n;
+                }
+                else if (key == "-outdir")
+                {
+                    c.outputDir = val; // 絶対パスなら Path.Combine でそのまま使われる
                 }
                 else if (key == "-timescale")
                 {

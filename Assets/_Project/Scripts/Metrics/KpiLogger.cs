@@ -65,20 +65,30 @@ namespace AirportSim
             string tag = c.policy + "_" + c.scenario + "_" + c.seed;
             File.WriteAllText(Path.Combine(dir, "passengers_" + tag + ".csv"), rows.ToString());
 
-            string summaryPath = Path.Combine(dir, "summary.csv");
-            StringBuilder sb = new StringBuilder();
-            if (!File.Exists(summaryPath))
-                sb.AppendLine("policy,scenario,seed,spawned,completed,avgWait,peakDensity,avgWaitHighFatigue,tacticNone,tacticQueueEq,tacticFatigueFirst");
-
+            string header = "policy,scenario,seed,spawned,completed,avgWait,peakDensity,avgWaitHighFatigue,tacticNone,tacticQueueEq,tacticFatigueFirst";
             string avgWait = completed > 0 ? F(sumWait / completed) : "";
             string avgHigh = highFatigueCount > 0 ? F(highFatigueSumWait / highFatigueCount) : "";
-            sb.AppendLine(string.Join(",", new string[]
+            string row = string.Join(",", new string[]
             {
                 c.policy.ToString(), c.scenario.ToString(), c.seed.ToString(),
                 sim.SpawnedCount.ToString(), completed.ToString(), avgWait, F(peakDensity), avgHigh,
                 tacticCounts[0].ToString(), tacticCounts[1].ToString(), tacticCounts[2].ToString()
-            }));
-            File.AppendAllText(summaryPath, sb.ToString());
+            });
+
+            // 1実行1ファイルの要約（並列実行でも衝突しない。analysis/summarize.py はこちらを読む）
+            File.WriteAllText(Path.Combine(dir, "summary_" + tag + ".csv"), header + "\n" + row + "\n");
+
+            // 互換用の追記型 summary.csv。並列実行で衝突しても実行全体は止めない
+            try
+            {
+                string summaryPath = Path.Combine(dir, "summary.csv");
+                string text = (File.Exists(summaryPath) ? "" : header + "\n") + row + "\n";
+                File.AppendAllText(summaryPath, text);
+            }
+            catch (IOException e)
+            {
+                Debug.LogWarning("summary.csv への追記をスキップ（summary_*.csv は保存済み）: " + e.Message);
+            }
             Debug.Log("KPI written: " + dir);
         }
 
